@@ -35,14 +35,14 @@ clientes). Usa el encabezado como la industria de la empresa al evaluar el fit.
 **Configuración.** Luego lee de memoria el archivo de configuración de esta skill:
 `/areas/monitoreo-vacantes-config.md`.
 
-- **Si existe y tiene la config**: úsala directamente (perfil, URLs ya descubiertas, preferencias,
+- **Si existe y tiene la config**: úsala directamente (perfil, empresas adicionales, preferencias,
   criterios ponderados). **No repreguntes lo que ya está ahí.** Salta al Paso 2 (Revisión).
   Antes de correr, puedes ofrecer una sola cosa útil: "¿Quieres agregar empresas nuevas o ajustar
   algún criterio antes de correr?" — y solo si dice que sí, recoges ese delta y actualizas la memoria.
 - **Si no existe o está incompleta**: haz la recolección del Paso 1 (solo lo que falte), y guárdalo.
 
 > Privacidad de la memoria: guarda en el archivo de config solo información funcional no sensible
-> (empresas adicionales, URLs, cargos/áreas objetivo, industrias, ubicación, modalidad, idiomas, y los criterios
+> (empresas adicionales, cargos/áreas objetivo, industrias, ubicación, modalidad, idiomas, y los criterios
 > ponderados con sus pesos de forma cualitativa/relativa). **No** escribas en memoria cifras exactas
 > de salario ni otros datos personales sensibles; si la persona da un piso salarial numérico, úsalo
 > solo en la corrida y guarda el criterio en términos relativos (p. ej. "compensación por encima de
@@ -65,8 +65,8 @@ al siguiente punto hasta tener el anterior.
 
 2. **Empresas objetivo.** No las pidas: ya las tienes de `reference.md` (Paso 0). Cuéntale en una
    línea cuántas empresas y qué industrias vas a revisar, y aclárale que puede **sumar más empresas**
-   cuando quiera. Tampoco pidas las URLs: `reference.md` solo trae nombres, así que la página de
-   empleo de cada empresa la localizas tú en el Paso 2. Si la persona ofrece una URL, úsala.
+   cuando quiera. Tampoco pidas las URLs: `reference.md` solo trae nombres, y las vacantes de
+   cada empresa las localizas tú por búsqueda en el Paso 2. Si la persona ofrece una URL, úsala.
 
 3. **Preferencias de match** que no queden claras del perfil: ubicación/ciudad, modalidad
    (remoto/híbrido/presencial), nivel del cargo, áreas funcionales, idioma.
@@ -95,9 +95,8 @@ desaparece de `reference.md`, deja de revisarse.
 ## Resiliencia (regla que manda sobre todo el proceso)
 
 Que la página de **una** empresa cambie de estructura, se caiga, dé timeout o devuelva basura
-**nunca** debe detener la corrida. Si tras el reintento del Paso 2 no se pueden obtener las vacantes
-de una empresa, regístrala como "could not be reviewed" (con el síntoma concreto) y sigue con la
-siguiente. **Toda** empresa debe intentarse y quedar registrada en la salida: como match, como sin
+**nunca** debe detener la corrida. Si en el Paso 2 no se puede obtener información de una empresa,
+regístrala como "could not be reviewed" (con el síntoma concreto) y sigue con la siguiente. **Toda** empresa debe intentarse y quedar registrada en la salida: como match, como sin
 match, o como "could not be reviewed". Nunca abortes la corrida a medias.
 
 ---
@@ -106,22 +105,31 @@ match, o como "could not be reviewed". Nunca abortes la corrida a medias.
 
 Para **cada** empresa de `reference.md` (más las empresas adicionales de la config, si hay):
 
-1. Ubica su página de "trabaja con nosotros" / ofertas laborales. Si la config ya tiene una URL
-   guardada para esa empresa, usa esa. Si no, búscala con **web_search** (p. ej.
-   `"<empresa>" trabaja con nosotros Colombia`, `"<empresa>" careers`) y guarda en la config la URL
-   que funcione, para no volver a buscarla en la próxima corrida. Luego visita cada URL con
-   **web_fetch**, pidiéndole extraer la lista de vacantes abiertas hoy (título, ubicación,
-   URL/enlace si es visible, y una descripción corta).
-2. Las páginas corporativas suelen ser ATS renderizados con JavaScript (Workday, SuccessFactors,
-   Magneto365, ElEmpleo, etc.) donde web_fetch a veces solo ve un cascarón sin vacantes. Cuando pase:
-   - Usa **web_search** con consultas tipo `"<empresa>" empleos Recursos Humanos`,
-     `"<empresa>" careers HR Director`, o `"<empresa>" vacantes "Recursos Humanos"` para localizar
-     páginas de vacantes específicas o una URL de listados que sí funcione.
-   - Haz web_fetch de las URLs prometedoras que encuentres así.
-   - Si aun así no se logran vacantes, marca la empresa como "could not be reviewed" en vez de inventar
-     ofertas, y sigue. **Nunca** inventes vacantes, URLs ni descripciones — reporta solo lo que apareció
-     en el resultado de una herramienta.
-3. Lleva registro de **cada URL** (de la config o descubierta) que no se pudo alcanzar o devolvió error.
+1. **Primero busca, no abras páginas.** Empieza siempre con **web_search**; no hagas web_fetch de la
+   página de empleo de la empresa "por si acaso". Cada web_fetch le pide confirmación a la persona,
+   así que se reserva para lo que de verdad lo amerita. Haz 2–3 búsquedas por empresa combinando el
+   nombre con los cargos/áreas objetivo del perfil y la ubicación, p. ej.
+   `"<empresa>" vacante <cargo objetivo> <ciudad/país>`, `"<empresa>" careers <área funcional>`,
+   `"<empresa>" trabaja con nosotros <área funcional>`. De los resultados toma lo que se ve: título
+   del cargo, fragmento de descripción, ubicación y URL.
+2. **Filtra los resultados promisorios.** Un resultado es promisorio cuando apunta a una vacante
+   concreta de esa empresa (o a un listado donde se ve al menos un cargo afín), el cargo cae
+   razonablemente dentro del perfil y los criterios, y no está en las exclusiones del punto 5.
+   - **Si no hay ningún resultado promisorio**, no abras nada: registra la empresa como sin match,
+     aclarando en la razón que la revisión fue por búsqueda (p. ej. "la búsqueda no mostró vacantes
+     afines al perfil"), y sigue con la siguiente.
+   - Si la búsqueda falla o no devuelve nada utilizable sobre esa empresa, márcala como
+     "could not be reviewed" con el síntoma concreto.
+3. **Solo entonces usa web_fetch**, y solo sobre las URLs promisorias, para confirmar que la vacante
+   sigue abierta y completar el detalle (ubicación/modalidad, fecha de publicación, salario,
+   requisitos). Prefiere la URL de la vacante específica sobre la del listado general.
+   - Muchas páginas son ATS renderizados con JavaScript (Workday, SuccessFactors, Magneto365,
+     ElEmpleo, etc.) donde web_fetch solo ve un cascarón. Si pasa, no insistas con más páginas de esa
+     empresa: conserva la vacante con lo que mostró la búsqueda, di en `Rationale` que no se pudo
+     verificar en la página, y registra la URL como link roto.
+   - **Nunca** inventes vacantes, URLs ni descripciones — reporta solo lo que apareció en el resultado
+     de una herramienta (búsqueda o página).
+4. Lleva registro de **cada URL** que intentaste abrir y que no se pudo alcanzar o devolvió error.
    No descartes un enlace malo en silencio: o produce una vacante o va a la sección de links rotos. Para
    cada uno captura el detalle que la herramienta realmente muestre:
    - **Código HTTP** literal si se expone (403, 404, 410, 500, 503…).
@@ -132,7 +140,7 @@ Para **cada** empresa de `reference.md` (más las empresas adicionales de la con
    - **Cascarón JS**: si carga 200 pero devuelve cuerpo vacío sin vacantes, dilo distinto de un error real.
    - Clasifica cada enlace roto en una categoría: `CAPTCHA/bot-check`, `JS-rendered shell (no content)`,
      `404/dead link`, `timeout`, `DNS/connection error`, `5xx server error`, u `other` (con detalle).
-4. Para cada vacante real, evalúa el fit contra el perfil y los criterios ponderados: cargo/nivel, área
+5. Para cada vacante real, evalúa el fit contra el perfil y los criterios ponderados: cargo/nivel, área
    funcional, industria, requisitos explícitos (idioma, certificaciones, años) y los criterios propios de
    la persona. **Descarta** (no las incluyas en el Excel) las vacantes que caen en las exclusiones de la
    persona. Exclusiones por defecto, ajustables según lo que ella indique:
@@ -146,12 +154,13 @@ Para **cada** empresa de `reference.md` (más las empresas adicionales de la con
      **sí** son de interés y no se excluyen; solo se excluye lo estrictamente sindical.
 
    Guarda las exclusiones en la config de memoria para aplicarlas en todas las corridas.
-5. Califica cada match como **High / Medium / Low** fit, con una justificación de una línea atada a
+6. Califica cada match como **High / Medium / Low** fit, con una justificación de una línea atada a
    detalles específicos del perfil/criterios (no elogios genéricos).
 
-> Nota: web_fetch solo trae URLs que ya aparecen en la conversación (las guardadas en la config, o las que devuelva
-> web_search) y no accede a páginas detrás de login. Si una página exige autenticación, trátala como
-> "could not be reviewed" con ese motivo.
+> Nota: web_fetch solo trae URLs que ya aparecen en la conversación (las que devuelva web_search o
+> las que dé la persona) y no accede a páginas detrás de login. Si una vacante exige autenticación
+> para verse, trátala igual que un cascarón JS: consérvala con lo que mostró la búsqueda y registra
+> la URL como link roto con ese motivo.
 
 ---
 
