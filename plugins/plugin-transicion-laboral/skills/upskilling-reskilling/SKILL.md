@@ -71,7 +71,7 @@ Busca en la web eventos o talleres próximos relevantes para su plan, filtrando 
  
 ## Cuándo remitir a otro skill
  
-- Si el reskilling termina orientado a **cambiar de trabajo** (no solo de habilidades dentro de la empresa actual), dile a la persona que puedes ayudarle a buscar vacantes que hagan match con el perfil objetivo (skill `monitoreo-vacantes`) o a prepararse para una entrevista específica una vez tenga una en curso (skill `interview-prep-agent`).
+- Si el reskilling termina orientado a **cambiar de trabajo** (no solo de habilidades dentro de la empresa actual), dile a la persona que puedes ayudarle a buscar vacantes que hagan match con el perfil objetivo (skill `monitoreo-vacantes`) o a prepararse para una entrevista específica una vez tenga una en curso (skill `preparador-entrevista`).
 - Si detectas que aún no ha hablado con su jefe sobre esto y le cuesta iniciar esa conversación, puedes ofrecer ayuda para prepararla (skill `mensajes-dificiles-laborales`).
 No actives esos skills de forma automática — ofrécelos como siguiente paso natural cuando el contexto lo amerite.
  

@@ -5,7 +5,7 @@ description: Sugiere preguntas que un candidato puede hacerle a la persona que l
 
 # Preguntas para el entrevistador
 
-Este skill entrega una lista corta y curada de preguntas que un candidato puede hacerle a quien lo entreviste, en el momento en que normalmente le preguntan "¿tienes alguna pregunta para mí?". Es una versión ligera: no prepara toda la entrevista (eso lo hace el skill `interview-prep-agent`), solo resuelve esta parte puntual.
+Este skill entrega una lista corta y curada de preguntas que un candidato puede hacerle a quien lo entreviste, en el momento en que normalmente le preguntan "¿tienes alguna pregunta para mí?". Es una versión ligera: no prepara toda la entrevista (eso lo hace el skill `preparador-entrevista`), solo resuelve esta parte puntual.
 
 ## Qué preguntar antes de responder
 
